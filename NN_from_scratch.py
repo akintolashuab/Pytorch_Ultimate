@@ -4,6 +4,7 @@ import numpy as np
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+
 # %%
 import os
 print(os.getcwd())
@@ -21,10 +22,12 @@ print(X)
 Y= np.array(df['output'])
 print(Y)
 print("The shape of X: {} \nThe shape of Y : {}".format(X.shape, Y.shape))
+
 # %%splitting into train and test
 x_train, x_test, y_train, y_test = train_test_split(X, Y, 
 test_size=0.2, random_state=123)
 print(x_train.shape, x_test.shape, y_train.shape, y_test.shape)
+
 # %%Scalig the data
 scaler = StandardScaler()
 x_train_scale = scaler.fit_transform(x_train)
@@ -68,6 +71,49 @@ class Neural_Network_From_Scratch:
         dL_dw = dL_dpred * dpred_dhidden_1 * dhidden_1_dw 
         dL_db = dL_dpred * dpred_dhidden_1 * dhidden_1_db 
         return y_pred, dL_dw, dL_db
+
+# Optimizer
+    def optimizer(self, dL_dw, dL_db):
+        self.w = self.w - dL_dw * self.LR
+        self.b = self.b - dL_db * self.LR
+
+# training the Data
+    def train(self, ITERATIONS):
+        for i in range(ITERATIONS):
+            #define some random position
+            random_pos = np.random.randint(len(self.X_train))
+
+            #forward pass
+            y_train_true = self.y_train[random_pos]
+            y_train_pred = self.forward(self.X_train[random_pos])
+
+            #Calculate training losses
+            L = np.square(y_train_true - y_train_pred)
+            self.L_train.append(L)
+
+            #backward pass
+            y_pred, dL_dw, dL_db = self.backward_pass(self.X_train[random_pos], 
+                                                 y_train[random_pos])
+            
+            #Optimizer
+            self.optimizer(dL_dw, dL_db)
+
+            L_sum = 0
+            for j in len(self.X_test.shape[1]):
+                y_true = self.y_test[j]
+                y_pred = self.forward(self.X_test[j])
+                L_sum += np.square(y_true - y_pred)
+            self.L_test.append(L_sum)
+        return "Training Successful"
+    
+#%% Model Instance and Model Training    
+LR = 0.1
+ITERATIONS = 1000
+nn = Neural_Network_From_Scratch(LR = LR, X_train = x_train_scale, 
+        X_test = x_test_scale, y_train = y_train, y_test = y_test)
+nn.train(ITERATIONS = ITERATIONS)
+
+
 
 
 
