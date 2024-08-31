@@ -45,6 +45,7 @@ class Neural_Network_From_Scratch:
         self.y_test = y_test
         self.L_train = []
         self.L_test = []
+        self.test_pred = []
 
 # define some helper function
     def activation(self, x):
@@ -70,10 +71,10 @@ class Neural_Network_From_Scratch:
         dhidden_1_dw = X
         dL_dw = dL_dpred * dpred_dhidden_1 * dhidden_1_dw 
         dL_db = dL_dpred * dpred_dhidden_1 * dhidden_1_db 
-        return y_pred, dL_dw, dL_db
+        return dL_db, dL_dw
 
 # Optimizer
-    def optimizer(self, dL_dw, dL_db):
+    def optimizer(self, dL_db, dL_dw):
         self.w = self.w - dL_dw * self.LR
         self.b = self.b - dL_db * self.LR
         return f"the best params are: weight = {self.w} \nbias = {self.b}"
@@ -89,23 +90,24 @@ class Neural_Network_From_Scratch:
             y_train_pred = self.forward(self.X_train[random_pos])
 
             #Calculate training losses
-            L = np.square(y_train_true - y_train_pred)
+            L = np.sum(np.square(y_train_true - y_train_pred))
             self.L_train.append(L)
 
             #backward pass
-            y_pred, dL_dw, dL_db = self.backward_pass(self.X_train[random_pos], 
+            dL_db, dL_dw = self.backward_pass(self.X_train[random_pos], 
                                                  y_train[random_pos])
             
-            #Optimizer
-            self.optimizer(dL_dw, dL_db)
+            #Updating the weights
+            self.optimizer(dL_db, dL_dw)
 
             L_sum = 0
-            for j in range(len(self.X_test)):
+            for j in range(self.X_test.shape[0]):
                 y_true = self.y_test[j]
                 y_pred = self.forward(self.X_test[j])
                 L_sum += np.square(y_true - y_pred)
             self.L_test.append(L_sum)
-        return "Training Successful"
+            self.test_pred.append(y_pred)
+        return "Training Successfully Finished"
     
 #%% Model Instance and Model Training    
 LR = 0.1
@@ -115,9 +117,51 @@ nn = Neural_Network_From_Scratch(LR = LR, X_train = x_train_scale,
         X_test = x_test_scale, y_train = y_train, y_test = y_test)
 nn.train(ITERATIONS = ITERATIONS)
 #print(nn.L_train)
-pd.DataFrame(nn.L_test)
+pd.DataFrame(nn.L_train)
+#pd.DataFrame(nn.L_test)
 #print(len(nn.L_test))
 #pd.DataFrame(nn.L_train)
+
+# %%
+pd.DataFrame(nn.test_pred)
+# %%
+sns.lineplot(x = list(range(len(nn.L_test))), y = nn.L_test)
+# %% Iterate over test data
+total = x_test_scale.shape[0]
+correct = 0
+y_preds = []
+for i in range(total):
+    y_true = y_test[i]
+    y_pred = np.round(nn.forward(x_test_scale[i]))
+    y_preds.append(y_pred)
+    correct += 1 if np.any(y_true == y_pred) else 0
+# %%
+acc = correct / total
+acc
+# %%
+from collections import Counter
+Counter(y_test)
+# %%
+from sklearn.metrics import confusion_matrix
+confusion_matrix(y_true = y_test, y_pred = y_preds)
+# %%
+y_test.shape
+x_test_scale
+x_train_scale
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # %% Full batch gradient descent
 import numpy as np
@@ -194,9 +238,11 @@ class Neural_Network_From_Scratch:
             self.L_test.append(L_test)
         print("Training Successful")
         df_result = pd.DataFrame({ "Y_test": self.y_test,
-                    "Y_Prediction": np.round(y_test_pred) })
+                    "Y_Prediction": np.round(y_test_pred)})
+        
+        loss = pd.DataFrame(self.L_test)
 
-        return df_result
+        return df_result, loss
 
 # Data preparation (Example data, assuming df is your dataframe)
 X = np.array(df.loc[:, df.columns != 'output'])
@@ -223,3 +269,8 @@ print(train_loss_df)
 print(test_loss_df)
 
 # %%
+a, b = nn.train(1000)
+# %%
+a
+# %%
+b
