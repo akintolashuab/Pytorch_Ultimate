@@ -17,14 +17,26 @@ def loss(y, y_hat):
     return ((y-y_hat)**2).mean()
 
 def gradient(x, y, y_hat):
-    return np.dot(2*2, y_hat-y).mean()
+    return np.dot(2*x, y_hat-y).mean()
 
-print(f'prediction before training: f(6) = {forward_pass(5):.3f}')
+print(f'Prediction before training: f(6) = {forward_pass(6):.3f}')
 
 #Training
 
+lr = 0.01
+iteration = 100
+
+for i in range(iteration):
+    y_pred = forward_pass(X)
+    l = loss(Y, y_pred)
+    dw = gradient(X, Y, y_pred)
+    w-=lr*dw
+
+    if i%1 == 0:
+        print(f'Iteration {i}: w = {w:.3f}: Loss = {l:.8f}')
+
+print(f'Prediction after training: f(6) = {forward_pass(6):.3f}')
 
 
 
 
-# %%
