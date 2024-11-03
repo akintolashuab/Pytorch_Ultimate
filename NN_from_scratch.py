@@ -46,6 +46,7 @@ class Neural_Network_From_Scratch:
         self.L_train = []
         self.L_test = []
         self.test_pred = []
+        self.train_pred = []
 
 # define some helper function
     def activation(self, x):
@@ -88,6 +89,7 @@ class Neural_Network_From_Scratch:
             #forward pass
             y_train_true = self.y_train[random_pos]
             y_train_pred = self.forward(self.X_train[random_pos])
+            self.train_pred.append(y_train_pred)
 
             #Calculate training losses
             L = np.sum(np.square(y_train_true - y_train_pred))
@@ -124,6 +126,9 @@ pd.DataFrame(nn.L_train)
 
 # %%
 pd.DataFrame(nn.test_pred)
+
+# %%
+nn.train_pred
 # %%
 sns.lineplot(x = list(range(len(nn.L_test))), y = nn.L_test)
 # %% Iterate over test data
