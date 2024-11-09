@@ -21,7 +21,7 @@ X_numpy = np.array(X_list, dtype=np.float32).reshape(-1,1)
 X_numpy
 y_list = data.mpg.values.tolist()
 y_list 
-# %%
+# %%S
 X = torch.from_numpy(X_numpy)
 y = torch.tensor(y_list)
 y
@@ -65,5 +65,35 @@ plt.title("Loss over Iterations")
 plt.show()
 
 
+
+# %%
+print(f' Weight: {w.item()}   Bias: {b.item()}')
+# %%
+y_predicted = (w*X + b).detach().numpy()
+y_predicted
+# %%
+sns.scatterplot(x = X_list, y= y_list)
+#sns.lineplot(x = X_list, y= y_predicted.reshape(-1))
+sns.scatterplot(x = X_list, y= y_predicted.reshape(-1), color = 'red')
+# %%
+from sklearn.linear_model import LinearRegression
+model = LinearRegression()
+model.fit(X_list.reshape(-1, 1), y_list)
+
+# %%
+y_prediction = model.predict(X_list.reshape(-1,1))
+y_prediction
+# %%
+sns.scatterplot(x = X_list, y= y_list)
+sns.lineplot(x = X_list, y= y_prediction.reshape(-1))
+sns.scatterplot(x = X_list, y= y_prediction.reshape(-1), color = 'red')
+# %%
+model.coef_
+model.intercept_
+# %%
+import os
+from torchviz import make_dot
+os.environ['PATH'] += os.pathsep + 'C:/Program Files (86)/Graphviz/bin'
+make_dot(loss)
 
 # %%
