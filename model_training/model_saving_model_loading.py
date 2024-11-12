@@ -98,3 +98,10 @@ for epoch in range(num_epoch):
 sns.lineplot(x = range(num_epoch), y =losses)
 
 
+#%%to see the model parameters 
+model.state_dict() # to see the model parameters
+# %% to save model parameter
+torch.save(model.state_dict(), 'model.state_dict.pth')
+# %%
+model = LinearRegressionTorch(input_size = input_dim, output_size= output_dim)
+model.load_state_dict()

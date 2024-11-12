@@ -7,6 +7,8 @@ import torch.nn as nn
 import seaborn as sns
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
+from skorch import NeuralNetRegressor
+from sklearn.model_selection import GridSearchCV
 import graphlib
 
 #%%import dataset
@@ -65,36 +67,17 @@ LR =0.02
 optimizer = torch.optim.SGD(model.parameters(), lr = LR)
 
 # %% model iteration.
-losses =[]
-slope =[]
-bias = []
-num_epoch = 1000
-for epoch in range(num_epoch):
-    for i, (X, y) in enumerate(train_loader):
-        #set the gradients to zero
-        optimizer.zero_grad()
+net = NeuralNetRegressor(model, max_epochs = 1000, 
+                         lr =LR, iterator_train__shuffle = True )
+# %%
+net.set_params(train_split = False, verbose = 0)
+# %%
+params = {'lr' : [0.02, 0.05, 0.08],
+           'max_epochs': [20, 200, 500],
+           'batch_size': [2, 6, 8]}
 
-        #forward pass
-        y_pred = model(X)
+gs = GridSearchCV(net, params, scoring= 'r2', verbose =2, cv = 5)
+gs.fit(X, y)
+print(f'best score : {gs.best_score_} \nbest params: {gs.best_params_}')
 
-        loss = loss_ftn(y_pred, y)
-        loss.backward()
-
-        #update gradient
-        optimizer.step()
-
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            if name == "linear.weight":
-                slope.append(param.data.numpy()[0][0])
-            if name == "linear.bias":
-                bias.append(param.data.numpy()[0])
-        
-    losses.append(loss.item())
-    if epoch % 100 == 0:
-        print("Epoch: {}, Loss : {:.4f}".format(epoch, loss.item()))
-
-# %% visualize the loss
-sns.lineplot(x = range(num_epoch), y =losses)
-
-
+# %%
