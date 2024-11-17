@@ -18,7 +18,7 @@ transform = transforms.Compose([transforms.Resize(32),
                                 transforms.ToTensor(),
                                 transforms.Normalize(.5, .5)])
 
-batch_size = 4
+batch_size = 32
 trainset = torchvision.datasets.ImageFolder(root= "train", transform=transform)
 testset = torchvision.datasets.ImageFolder(root= "test", transform=transform)
 train_data_loader = DataLoader(trainset, batch_size= batch_size, shuffle=True)
@@ -66,18 +66,18 @@ class BinaryImageClassification(nn.Module):
         return x
 
 # %%training loop
-num_epoch = 20
+num_epoch = 2
 LR = 0.02
 model = BinaryImageClassification()
 loss_ftn = nn.BCELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr = LR)
+optimizer = torch.optim.SGD(model.parameters(), lr = LR, momentum=0.8)
 for epoch in range(num_epoch):
     for i, data in enumerate(train_data_loader, 0):
         
         inputs, label = data
 
         # Zero grad
-        optimizer.zero_grad
+        optimizer.zero_grad()
 
         #prediction
         output = model(inputs)
@@ -91,9 +91,22 @@ for epoch in range(num_epoch):
         #Update weight
         optimizer.step()
     
-        if i%100 = 0:
+        if i%100 == 0:
             print(f'Epoch {epoch}/ {num_epoch}, step = {i+1}/ {len(train_data_loader)},'
             f'Loss: {loss.item():.4f}')
 
+
+# %%
+y_test = []
+y_tes_pred = []
+for i, data in enumerate(test_data_loader, 0):
+    inputss, y_test_tempo = data
+    with torch.no_grad():
+        y_test_hat_temp = model(inputss).round()
+    y_test.extend(y_test_tempo.numpy())
+    y_tes_pred.extend(y_test_hat_temp.numpy())
+
+acc = accuracy_score(y_test, y_tes_pred)
+print(f'The accuracy of our model is {round(acc * 100, 2)}%')
 
 # %%
