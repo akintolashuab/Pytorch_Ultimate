@@ -80,3 +80,7 @@ for epoch in range(num_epoch):
 sns.lineplot(x = range(num_epoch), y =losses)
 
 # %%
+for i in range(0, 20, 2):
+    print(i)
+
+# %%
